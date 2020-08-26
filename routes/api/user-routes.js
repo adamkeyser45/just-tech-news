@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Post, Vote } = require('../../models');
 
 // GET /api/users
 router.get('/', (req, res) => {
@@ -20,7 +20,19 @@ router.get('/:id', (req, res) => {
         attributes: { exclude: ['password'] },
         where: {
             id: req.params.id
-        }
+        },
+        include: [
+            {
+                model: Post,
+                attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+                model: Post,
+                attributes: ['title'],
+                through: Vote,
+                as: 'voted_posts'
+            }
+          ]
     })
         .then(dbUserData => {
             if (!dbUserData) {
@@ -118,3 +130,21 @@ router.delete('/:id', (req, res) => {
 });
 
 module.exports = router;
+
+
+// {
+//     "username": "George", 
+//     "email": "george@gmail.com",
+//     "password": "pass1234"
+// }
+
+// {
+//     "title": "George is da bomb", 
+//       "post_url": "https://www.youtube.com/watch?v=lWULd19LvaY&t=11s",
+//       "user_id": 1
+// }
+
+// {
+//     "user_id": 1, 
+//     "post_id": 1
+// }
